@@ -1,4 +1,5 @@
 const youtubedl = require('youtube-dl-exec');
+const ffmpeg = require('ffmpeg-static');
 const fs = require('fs-extra');
 const path = require('path');
 
@@ -16,14 +17,16 @@ const downloadVideo = async (url, jobId) => {
     // Robust flags to bypass YouTube blocks and ensure good quality
     const options = {
       output: outputTemplate,
-      format: 'best[ext=mp4]/best',
+      // Priority: mp4 combined > webm combined > merge video+audio to mp4
+      format: 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+      ffmpegLocation: ffmpeg, // CRITICAL: Allows yt-dlp to merge SABR streams
       noCheckCertificates: true,
       noPlaylist: true,
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       extractorArgs: 'youtube:player_client=android,web',
     };
 
-    console.log('Download options:', JSON.stringify(options, null, 2));
+    console.log('Download options (with ffmpeg):', JSON.stringify({ ...options, ffmpegLocation: 'EXISTS' }, null, 2));
 
     const result = await youtubedl(url, options);
     console.log('yt-dlp execution finished');

@@ -1,6 +1,10 @@
 const ffmpeg = require('fluent-ffmpeg');
+const ffmpegPath = require('ffmpeg-static');
 const path = require('path');
 const fs = require('fs-extra');
+
+// Set path binary FFmpeg secara eksplisit
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 const cutAndProcessVideo = (videoPath, segments, jobId) => {
   return new Promise(async (resolve, reject) => {
@@ -14,12 +18,16 @@ const cutAndProcessVideo = (videoPath, segments, jobId) => {
         const outputFilename = `${jobId}_clip_${i + 1}.mp4`;
         const outputPath = path.join(outputDir, outputFilename);
 
-        console.log(`Processing clip ${i + 1}: ${seg.start}s to ${seg.end}s`);
+        // Map properties correctly: AI returns start_time/end_time
+        const start = seg.start_time || seg.start || 0;
+        const end = seg.end_time || seg.end || 0;
+
+        console.log(`Processing clip ${i + 1}: ${start}s to ${end}s`);
 
         await new Promise((res, rej) => {
           ffmpeg(videoPath)
-            .setStartTime(seg.start)
-            .setDuration(seg.end - seg.start)
+            .setStartTime(start)
+            .setDuration(end - start)
             // Filter kompleks untuk Vertical 9:16
             // 1. Crop center ke rasio aspect yang mendekati
             // 2. Scale ke 1080x1920
