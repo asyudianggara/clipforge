@@ -13,6 +13,16 @@ interface SettingsModalProps {
   onSave: (config: AIConfig) => void;
 }
 
+interface ProviderDetail {
+  name: string;
+  description: string;
+  needsKey: boolean;
+  speed: string;
+  cost: string;
+  accuracy: string;
+  helpUrl?: string;
+}
+
 export default function SettingsModal({ isOpen, onClose, onSave }: SettingsModalProps) {
   const [provider, setProvider] = useState<AIConfig["provider"]>("local");
   const [apiKey, setApiKey] = useState("");
@@ -88,7 +98,7 @@ export default function SettingsModal({ isOpen, onClose, onSave }: SettingsModal
     }
   };
 
-  const providerInfo = {
+  const providerInfo: Record<AIConfig["provider"], ProviderDetail> = {
     local: {
       name: "Local (Free)",
       description: "Uses local processing. Free but slower (2-3x).",
