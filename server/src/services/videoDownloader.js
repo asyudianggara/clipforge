@@ -13,12 +13,20 @@ const downloadVideo = async (url, jobId) => {
     
     console.log(`Starting download for Job ${jobId} from URL: ${url}`);
 
-    // Konfigurasi yt-dlp yang MINIMAL untuk avoid error
-    const result = await youtubedl(url, {
+    // Robust flags to bypass YouTube blocks and ensure good quality
+    const options = {
       output: outputTemplate,
       format: 'best[ext=mp4]/best',
-      noCheckCertificates: true
-    });
+      noCheckCertificates: true,
+      noPlaylist: true,
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      extractorArgs: 'youtube:player_client=android,web',
+    };
+
+    console.log('Download options:', JSON.stringify(options, null, 2));
+
+    const result = await youtubedl(url, options);
+    console.log('yt-dlp execution finished');
 
     // Cari file yang baru dibuat
     const files = await fs.readdir(DOWNLOAD_DIR);
