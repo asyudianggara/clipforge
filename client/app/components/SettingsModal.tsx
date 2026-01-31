@@ -67,31 +67,31 @@ export default function SettingsModal({ isOpen, onClose, onSave }: SettingsModal
       if (provider === "local") {
         setTestResult({
           success: true,
-          message: "Local mode - No connection test needed. Ready to use!"
+          message: "Mode lokal - Tidak perlu tes koneksi. Siap digunakan!"
         });
       } else if (!apiKey || apiKey.trim() === "") {
         setTestResult({
           success: false,
-          message: "Please enter an API key first"
+          message: "Silakan masukkan kunci API terlebih dahulu"
         });
       } else {
         // For OpenAI, basic format validation
         if (provider === "openai" && !apiKey.startsWith("sk-")) {
           setTestResult({
             success: false,
-            message: "OpenAI API keys should start with 'sk-'"
+            message: "Kunci API OpenAI harus dimulai dengan 'sk-'"
           });
         } else {
           setTestResult({
             success: true,
-            message: "API key format looks valid! (Will be fully tested when processing a video)"
+            message: "Format kunci API terlihat valid! (Akan diuji sepenuhnya saat memproses video)"
           });
         }
       }
     } catch (error) {
       setTestResult({
         success: false,
-        message: "Connection test failed"
+        message: "Tes koneksi gagal"
       });
     } finally {
       setIsTesting(false);
@@ -100,38 +100,38 @@ export default function SettingsModal({ isOpen, onClose, onSave }: SettingsModal
 
   const providerInfo: Record<AIConfig["provider"], ProviderDetail> = {
     local: {
-      name: "Local (Free)",
-      description: "Uses local processing. Free but slower (2-3x).",
+      name: "Lokal (Gratis)",
+      description: "Menggunakan pemrosesan lokal. Gratis tetapi lebih lambat (2-3x).",
       needsKey: false,
-      speed: "Slow",
-      cost: "FREE",
-      accuracy: "Good (85-90%)"
+      speed: "Lambat",
+      cost: "GRATIS",
+      accuracy: "Baik (85-90%)"
     },
     openai: {
       name: "OpenAI",
-      description: "Fast and accurate. Requires API key and credit.",
+      description: "Cepat dan akurat. Memerlukan kunci API dan kredit.",
       needsKey: true,
-      speed: "Fast",
+      speed: "Cepat",
       cost: "$0.02/video",
-      accuracy: "Excellent (95%+)",
+      accuracy: "Sangat Baik (95%+)",
       helpUrl: "https://platform.openai.com/api-keys"
     },
     gemini: {
       name: "Google Gemini",
-      description: "Fast with free tier. May have regional restrictions.",
+      description: "Cepat dengan opsi gratis. Mungkin ada batasan wilayah.",
       needsKey: true,
-      speed: "Fast",
-      cost: "Free Tier Available",
-      accuracy: "Excellent (95%+)",
+      speed: "Cepat",
+      cost: "Tersedia Opsi Gratis",
+      accuracy: "Sangat Baik (95%+)",
       helpUrl: "https://aistudio.google.com/app/apikey"
     },
     openrouter: {
       name: "OpenRouter",
-      description: "Access to multiple AI models. Flexible pricing.",
+      description: "Akses ke berbagai model AI. Harga fleksibel.",
       needsKey: true,
-      speed: "Fast",
+      speed: "Cepat",
       cost: "$0.01+/video",
-      accuracy: "Excellent (95%+)",
+      accuracy: "Sangat Baik (95%+)",
       helpUrl: "https://openrouter.ai/keys"
     }
   };
@@ -146,7 +146,7 @@ export default function SettingsModal({ isOpen, onClose, onSave }: SettingsModal
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            ⚙️ AI Settings
+            ⚙️ Pengaturan AI
           </h2>
           <button
             onClick={onClose}
@@ -159,7 +159,7 @@ export default function SettingsModal({ isOpen, onClose, onSave }: SettingsModal
         {/* Provider Selection */}
         <div className="space-y-4 mb-6">
           <label className="block text-sm font-medium text-gray-300">
-            Select AI Provider
+            Pilih Penyedia AI
           </label>
           
           {(Object.keys(providerInfo) as Array<AIConfig["provider"]>).map((p) => (
@@ -186,7 +186,7 @@ export default function SettingsModal({ isOpen, onClose, onSave }: SettingsModal
                     </span>
                     {p === "local" && (
                       <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">
-                        FREE
+                        GRATIS
                       </span>
                     )}
                   </div>
@@ -194,9 +194,9 @@ export default function SettingsModal({ isOpen, onClose, onSave }: SettingsModal
                     {providerInfo[p].description}
                   </p>
                   <div className="flex gap-4 text-xs text-gray-500 mt-2 ml-6">
-                    <span>Speed: {providerInfo[p].speed}</span>
-                    <span>Cost: {providerInfo[p].cost}</span>
-                    <span>Accuracy: {providerInfo[p].accuracy}</span>
+                    <span>Kecepatan: {providerInfo[p].speed}</span>
+                    <span>Biaya: {providerInfo[p].cost}</span>
+                    <span>Akurasi: {providerInfo[p].accuracy}</span>
                   </div>
                 </div>
               </div>
@@ -208,14 +208,14 @@ export default function SettingsModal({ isOpen, onClose, onSave }: SettingsModal
         {currentInfo.needsKey && (
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              API Key
+              Kunci API
             </label>
             <div className="relative">
               <input
                 type={showKey ? "text" : "password"}
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
-                placeholder="Enter your API key..."
+                placeholder="Masukkan kunci API Anda..."
                 className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-purple-500 focus:outline-none pr-20"
               />
               <button
@@ -223,19 +223,19 @@ export default function SettingsModal({ isOpen, onClose, onSave }: SettingsModal
                 onClick={() => setShowKey(!showKey)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white text-sm"
               >
-                {showKey ? "Hide" : "Show"}
+                {showKey ? "Sembunyikan" : "Tampilkan"}
               </button>
             </div>
             {currentInfo.helpUrl && (
               <p className="text-xs text-gray-500 mt-2">
-                Don't have a key?{" "}
+                Belum punya kunci?{" "}
                 <a
                   href={currentInfo.helpUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-purple-400 hover:underline"
                 >
-                  Get one here →
+                  Dapatkan di sini →
                 </a>
               </p>
             )}
@@ -262,21 +262,21 @@ export default function SettingsModal({ isOpen, onClose, onSave }: SettingsModal
             disabled={isTesting}
             className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg font-medium transition-colors disabled:opacity-50"
           >
-            {isTesting ? "Testing..." : "Test Connection"}
+            {isTesting ? "Sedang Mengetes..." : "Tes Koneksi"}
           </button>
           <button
             onClick={handleSave}
             className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white py-3 rounded-lg font-medium transition-all shadow-lg shadow-purple-500/30"
           >
-            Save Settings
+            Simpan Pengaturan
           </button>
         </div>
 
         {/* Info Box */}
         <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
           <p className="text-xs text-blue-300">
-            💡 <strong>Your API key is stored locally</strong> in your browser and sent
-            directly to the AI provider. CLIPFORGE never stores your keys on our servers.
+            💡 <strong>Kunci API Anda disimpan secara lokal</strong> di browser Anda dan dikirim
+            langsung ke penyedia AI. CLIPFORGE tidak pernah menyimpan kunci Anda di server kami.
           </p>
         </div>
       </div>

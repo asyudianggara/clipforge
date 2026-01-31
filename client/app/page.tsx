@@ -111,19 +111,19 @@ export default function Home() {
 
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/50 border border-border/50 text-xs font-medium text-muted-foreground mb-4">
             <Sparkles className="w-3 h-3 text-indigo-400" />
-            <span>AI-Powered Video Repurposing</span>
+            <span>Transformasi Video Bertenaga AI</span>
           </div>
           <h1 className="text-4xl sm:text-6xl font-bold font-heading tracking-tight text-white">
             CLIP<span className="text-indigo-500">FORGE</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Transform long videos into viral shorts instantly. Paste your video URL below and let AI handle the rest.
+            Ubah video panjang menjadi shorts viral secara instan. Tempel URL video Anda di bawah dan biarkan AI yang bekerja.
           </p>
           {/* Provider Badge */}
           <div className="flex items-center justify-center gap-2 text-xs">
-            <span className="text-gray-500">Using:</span>
+            <span className="text-gray-500">Menggunakan:</span>
             <span className="px-2 py-1 bg-purple-500/20 text-purple-300 rounded border border-purple-500/30">
-              {aiConfig.provider === "local" ? "Local (Free)" : aiConfig.provider.toUpperCase()}
+              {aiConfig.provider === "local" ? "Lokal (Gratis)" : aiConfig.provider.toUpperCase()}
             </span>
           </div>
         </div>
@@ -158,7 +158,7 @@ export default function Home() {
                     type="text"
                     value={url || ""}
                     onChange={(e) => setUrl(e.target.value)}
-                    placeholder="Paste YouTube, TikTok, or Instagram link..."
+                    placeholder="Tempel tautan YouTube, TikTok, atau Instagram..."
                     className="w-full h-12 pl-10 pr-4 bg-transparent border-none rounded-xl focus:ring-0 focus:outline-none text-foreground placeholder:text-muted-foreground/50"
                   />
                 </div>
@@ -171,7 +171,7 @@ export default function Home() {
                   {/* Custom Placeholder UI */}
                   {!file && (
                     <div className="absolute left-10 top-1/2 -translate-y-1/2 text-muted-foreground/50 pointer-events-none z-10 truncate w-[calc(100%-3rem)] text-left">
-                      Select video file (MP4, MKV, etc.)
+                      Pilih file video (MP4, MKV, dll.)
                     </div>
                   )}
                   {file && (
@@ -199,7 +199,7 @@ export default function Home() {
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <>
-                    <span>{mode === "url" ? "Generate" : "Upload & Process"}</span>
+                    <span>{mode === "url" ? "Buat Video" : "Unggah & Proses"}</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -209,7 +209,7 @@ export default function Home() {
             {/* Clip Count Control */}
             <div className="flex items-center justify-between px-4 py-3 bg-secondary/30 rounded-xl border border-border/50">
               <div className="flex items-center gap-3">
-                <span className="text-sm font-medium text-gray-300">Number of Clips:</span>
+                <span className="text-sm font-medium text-gray-300">Jumlah Klip:</span>
                 <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-400 text-sm font-bold rounded border border-indigo-500/30">
                   {clipCount}
                 </span>
@@ -234,7 +234,7 @@ export default function Home() {
         {/* Results Gallery */}
         {results && (
           <div className="w-full animate-in fade-in slide-in-from-bottom-8">
-            <h2 className="text-2xl font-bold mb-6 text-left">Your Viral Shorts</h2>
+            <h2 className="text-2xl font-bold mb-6 text-left">Video Shorts Viral Anda</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {results.map((clip: any, idx: number) => (
                 <div key={idx} className="bg-card border border-border overflow-hidden rounded-xl p-3 flex gap-4 items-center group hover:border-indigo-500/50 transition-all">
@@ -244,9 +244,9 @@ export default function Home() {
                   <div className="flex-1 text-left">
                     <h3 className="font-semibold line-clamp-1">Clip #{idx + 1}</h3>
                     <p className="text-xs text-muted-foreground">
-                      Duration: {Math.round((clip.info.end_time || 0) - (clip.info.start_time || 0))}s
+                      Durasi: {Math.round((clip.info.end_time || 0) - (clip.info.start_time || 0))}s
                     </p>
-                    <p className="text-xs text-indigo-400 mt-1">Viral Score: {clip.info.score}/100</p>
+                    <p className="text-xs text-indigo-400 mt-1">Skor Viral: {clip.info.score}/100</p>
                   </div>
                   <button 
                     onClick={() => window.open(`http://localhost:5000/downloads/${clip.filename}`, '_blank')}
@@ -261,7 +261,7 @@ export default function Home() {
               onClick={() => { setResults(null); setCurrentJobId(null); setUrl(""); }}
               className="mt-8 text-sm text-muted-foreground hover:text-foreground underline"
             >
-              Create New
+              Buat Baru
             </button>
           </div>
         )}
@@ -270,9 +270,9 @@ export default function Home() {
         {!currentJobId && !results && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full pt-12 opacity-80">
             {[
-              { label: "Smart Trimming", desc: "AI detects viral moments" },
-              { label: "Auto Captions", desc: "Animated subtitles included" },
-              { label: "Viral Format", desc: "Vertical 9:16 ready" },
+              { label: "Pemotongan Cerdas", desc: "AI mendeteksi momen viral" },
+              { label: "Teks Otomatis", desc: "Termasuk subtitle animasi" },
+              { label: "Format Viral", desc: "Siap Format Vertikal 9:16" },
             ].map((item, idx) => (
               <div key={idx} className="p-4 rounded-xl bg-secondary/20 border border-border/30 backdrop-blur-md">
                 <h3 className="font-semibold text-foreground">{item.label}</h3>

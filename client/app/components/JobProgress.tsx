@@ -10,7 +10,7 @@ interface JobProgressProps {
 
 export default function JobProgress({ jobId, onComplete }: JobProgressProps) {
   const [progress, setProgress] = useState(0);
-  const [status, setStatus] = useState("Initializing...");
+  const [status, setStatus] = useState("Menginisialisasi...");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -28,22 +28,22 @@ export default function JobProgress({ jobId, onComplete }: JobProgressProps) {
           setProgress(data.progress || 0);
           
           // Map progress to human readable status
-          if (data.progress < 10) setStatus("Queued...");
-          else if (data.progress < 30) setStatus("Downloading Video...");
-          else if (data.progress < 50) setStatus("Extracting Audio...");
-          else if (data.progress < 60) setStatus("Transcribing Audio...");
-          else if (data.progress < 80) setStatus("Analyzing Viral Content...");
-          else if (data.progress < 100) setStatus("Cutting & Rendering...");
-          else setStatus("Finalizing...");
+          if (data.progress < 10) setStatus("Dalam Antrean...");
+          else if (data.progress < 30) setStatus("Mengunduh Video...");
+          else if (data.progress < 50) setStatus("Mengekstrak Audio...");
+          else if (data.progress < 60) setStatus("Mentranskripsi Audio...");
+          else if (data.progress < 80) setStatus("Menganalisis Konten Viral...");
+          else if (data.progress < 100) setStatus("Memotong & Merender...");
+          else setStatus("Menyelesaikan...");
 
           if (data.state === "completed") {
             clearInterval(interval);
-            setStatus("Process Complete!");
+            setStatus("Proses Selesai!");
             setProgress(100);
             onComplete(data.result);
           } else if (data.state === "failed") {
             clearInterval(interval);
-            setError(data.error || "Job failed");
+            setError(data.error || "Pekerjaan Gagal");
           }
         }
       } catch (err) {
@@ -85,7 +85,7 @@ export default function JobProgress({ jobId, onComplete }: JobProgressProps) {
       {progress === 100 && (
         <div className="pt-2 flex justify-center text-green-500 items-center gap-2">
            <CheckCircle className="w-5 h-5" />
-           <span className="font-semibold">All Done!</span>
+           <span className="font-semibold">Selesai!</span>
         </div>
       )}
     </div>
