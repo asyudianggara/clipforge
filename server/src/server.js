@@ -12,6 +12,15 @@ const jobRoutes = require('./routes/jobRoutes');
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from downloads and uploads directory
+const path = require('path');
+const fs = require('fs-extra');
+const UPLOADS_DIR = path.join(__dirname, '../uploads');
+fs.ensureDirSync(UPLOADS_DIR);
+
+app.use('/downloads', express.static(path.join(__dirname, '../downloads')));
+app.use('/uploads', express.static(UPLOADS_DIR));
+
 app.use('/api/jobs', jobRoutes);
 
 app.get('/', (req, res) => {

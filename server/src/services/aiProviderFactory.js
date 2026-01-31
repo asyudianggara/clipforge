@@ -121,10 +121,10 @@ class OpenAIAnalyzer {
     this.client = new OpenAI({ apiKey });
   }
 
-  async analyzeContent(transcript, videoDuration = 0) {
-    console.log('Using OpenAI GPT for content analysis...');
+  async analyzeContent(transcript, videoDuration = 0, clipCount = 3) {
+    console.log(`Using OpenAI GPT for content analysis (Requested ${clipCount} segments)...`);
     
-    const prompt = `Analyze this video transcript and identify 3-5 most engaging segments (30-60 seconds each) that would work well as short-form content (Instagram Reels, TikTok, YouTube Shorts).
+    const prompt = `Analyze this video transcript and identify exactly ${clipCount} most engaging segments (30-60 seconds each) that would work well as short-form content (Instagram Reels, TikTok, YouTube Shorts).
 
 Transcript:
 ${transcript}

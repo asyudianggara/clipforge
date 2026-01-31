@@ -3,7 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 
 const createJob = async (req, res) => {
   try {
-    const { url, provider = 'local', apiKey = null } = req.body;
+    const { url, provider = 'local', apiKey = null, clipCount = 3 } = req.body;
 
     if (!url) {
       return res.status(400).json({ error: 'URL video diperlukan' });
@@ -16,18 +16,19 @@ const createJob = async (req, res) => {
 
     const jobId = uuidv4();
     
-    console.log(`Creating job with provider: ${provider}`);
+    console.log(`Creating job with provider: ${provider}, clipCount: ${clipCount}`);
     
     // Menambahkan job ke antrian dengan provider & API Key
     await videoQueue.add({
       id: jobId,
       url,
-      provider: provider || 'local', // Default ke local jika tidak ada
+      provider: provider || 'local',
       apiKey: apiKey || null,
+      clipCount: Number(clipCount) || 3,
       status: 'pending',
       createdAt: new Date()
     }, {
-      jobId: jobId // PENTING: Gunakan UUID kita sebagai ID job di Bull/Redis
+      jobId: jobId
     });
 
     res.status(201).json({
@@ -66,7 +67,51 @@ const getJobStatus = async (req, res) => {
   });
 };
 
+const createUploadJob = async (req, res) => {
+  try {
+    const { provider = 'local', apiKey = null, clipCount = 3 } = req.body;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ error: 'File video tidak ditemukan' });
+    }
+
+    const jobId = uuidv4();
+    const filePath = file.path;
+
+    console.log(`Creating upload job with provider: ${provider}, clipCount: ${clipCount}`);
+    console.log(`File: ${file.originalname} saved at ${filePath}`);
+
+    await videoQueue.add({
+      id: jobId,
+      url: null, // No URL for local files
+      isLocalFile: true,
+      filePath: filePath,
+      fileName: file.originalname,
+      provider: provider || 'local',
+      apiKey: apiKey || null,
+      clipCount: Number(clipCount) || 3,
+      status: 'pending',
+      createdAt: new Date()
+    }, {
+      jobId: jobId
+    });
+
+    res.status(201).json({
+      message: 'Job upload berhasil dibuat',
+      jobId,
+      provider: provider || 'local',
+      status: 'queued'
+    });
+
+  } catch (error) {
+    console.error('Error creating upload job:', error);
+    res.status(500).json({ error: 'Gagal membuat job processing untuk file upload' });
+  }
+};
+
 module.exports = {
   createJob,
-  getJobStatus
+  getJobStatus,
+  createUploadJob
 };

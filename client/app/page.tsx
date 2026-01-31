@@ -7,7 +7,10 @@ import SettingsModal from "./components/SettingsModal";
 
 export default function Home() {
   const [url, setUrl] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [mode, setMode] = useState<"url" | "upload">("url");
   const [isLoading, setIsLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
   const [results, setResults] = useState<any[] | null>(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -15,6 +18,7 @@ export default function Home() {
     provider: "local", 
     apiKey: "" 
   });
+  const [clipCount, setClipCount] = useState(3);
 
   // Load AI config on mount
   useEffect(() => {
@@ -29,23 +33,41 @@ export default function Home() {
   }, []);
 
   const handleGenerate = async () => {
-    if (!url) return;
+    if (mode === "url" && !url) return;
+    if (mode === "upload" && !file) return;
     
     setIsLoading(true);
     setResults(null);
     setCurrentJobId(null);
+    setUploadProgress(0);
 
     try {
-      // Send provider and API key from user settings
-      const response = await fetch("http://localhost:5000/api/jobs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          url,
-          provider: aiConfig.provider,
-          apiKey: aiConfig.apiKey || null
-        }),
-      });
+      let response;
+      
+      if (mode === "url") {
+        response = await fetch("http://localhost:5000/api/jobs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            url,
+            provider: aiConfig.provider,
+            apiKey: aiConfig.apiKey || null,
+            clipCount: clipCount
+          }),
+        });
+      } else {
+        // Handle File Upload
+        const formData = new FormData();
+        formData.append("video", file!);
+        formData.append("provider", aiConfig.provider);
+        if (aiConfig.apiKey) formData.append("apiKey", aiConfig.apiKey);
+        formData.append("clipCount", clipCount.toString());
+
+        response = await fetch("http://localhost:5000/api/jobs/upload", {
+          method: "POST",
+          body: formData,
+        });
+      }
 
       const data = await response.json();
 
@@ -108,33 +130,99 @@ export default function Home() {
 
         {/* Input Area (Hide when job is running or done to focus user) */}
         {!currentJobId && !results && (
-          <div className="w-full max-w-xl p-2 bg-card/50 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl flex flex-col sm:flex-row gap-2 transition-all hover:border-indigo-500/30">
-            <div className="relative flex-1">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                <Video className="w-5 h-5" />
+          <div className="w-full max-w-xl space-y-4">
+            {/* Mode Toggle */}
+            <div className="flex p-1 bg-secondary/50 rounded-xl border border-border/50 w-fit mx-auto">
+              <button
+                onClick={() => setMode("url")}
+                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${mode === "url" ? "bg-indigo-600 text-white shadow-lg" : "text-muted-foreground hover:text-white"}`}
+              >
+                Video Link
+              </button>
+              <button
+                onClick={() => setMode("upload")}
+                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${mode === "upload" ? "bg-indigo-600 text-white shadow-lg" : "text-muted-foreground hover:text-white"}`}
+              >
+                Upload File
+              </button>
+            </div>
+
+            {/* Input Selection */}
+            <div className={`p-2 bg-card/50 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl flex flex-col sm:flex-row gap-2 transition-all hover:border-indigo-500/30 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
+              {mode === "url" ? (
+                <div className="relative flex-1">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    <Video className="w-5 h-5" />
+                  </div>
+                  <input
+                    type="text"
+                    value={url || ""}
+                    onChange={(e) => setUrl(e.target.value)}
+                    placeholder="Paste YouTube, TikTok, or Instagram link..."
+                    className="w-full h-12 pl-10 pr-4 bg-transparent border-none rounded-xl focus:ring-0 focus:outline-none text-foreground placeholder:text-muted-foreground/50"
+                  />
+                </div>
+              ) : (
+                <div className="relative flex-1 h-12">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground z-10 pointer-events-none">
+                    <Download className="w-5 h-5" />
+                  </div>
+                  
+                  {/* Custom Placeholder UI */}
+                  {!file && (
+                    <div className="absolute left-10 top-1/2 -translate-y-1/2 text-muted-foreground/50 pointer-events-none z-10 truncate w-[calc(100%-3rem)] text-left">
+                      Select video file (MP4, MKV, etc.)
+                    </div>
+                  )}
+                  {file && (
+                    <div className="absolute left-10 top-1/2 -translate-y-1/2 text-indigo-400 font-medium z-10 truncate w-[calc(100%-3rem)] text-left pr-4">
+                      {file.name} ({(file.size / 1024 / 1024).toFixed(1)} MB)
+                    </div>
+                  )}
+
+                  {/* Invisible Input Overlay */}
+                  <input
+                    type="file"
+                    accept="video/*"
+                    onChange={(e) => setFile(e.target.files?.[0] || null)}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                  />
+                </div>
+              )}
+              
+              <button 
+                onClick={handleGenerate}
+                disabled={isLoading || (mode === "url" ? !url : !file)}
+                className="h-12 px-6 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20 whitespace-nowrap"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <span>{mode === "url" ? "Generate" : "Upload & Process"}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Clip Count Control */}
+            <div className="flex items-center justify-between px-4 py-3 bg-secondary/30 rounded-xl border border-border/50">
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-300">Number of Clips:</span>
+                <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-400 text-sm font-bold rounded border border-indigo-500/30">
+                  {clipCount}
+                </span>
               </div>
-              <input
-                type="text"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="Paste YouTube, TikTok, or Instagram link..."
-                className="w-full h-12 pl-10 pr-4 bg-transparent border-none rounded-xl focus:ring-0 focus:outline-none text-foreground placeholder:text-muted-foreground/50"
+              <input 
+                type="range" 
+                min="1" 
+                max="10" 
+                value={clipCount} 
+                onChange={(e) => setClipCount(parseInt(e.target.value))}
+                className="w-32 sm:w-48 h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-indigo-500"
               />
             </div>
-            <button 
-              onClick={handleGenerate}
-              disabled={isLoading || !url}
-              className="h-12 px-6 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20"
-            >
-              {isLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <>
-                  <span>Generate</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
           </div>
         )}
 
@@ -155,10 +243,15 @@ export default function Home() {
                   </div>
                   <div className="flex-1 text-left">
                     <h3 className="font-semibold line-clamp-1">Clip #{idx + 1}</h3>
-                    <p className="text-xs text-muted-foreground">Duration: {Math.round(clip.info.end - clip.info.start)}s</p>
+                    <p className="text-xs text-muted-foreground">
+                      Duration: {Math.round((clip.info.end_time || 0) - (clip.info.start_time || 0))}s
+                    </p>
                     <p className="text-xs text-indigo-400 mt-1">Viral Score: {clip.info.score}/100</p>
                   </div>
-                  <button className="p-2 bg-secondary text-foreground rounded-lg hover:bg-indigo-600 hover:text-white transition-colors">
+                  <button 
+                    onClick={() => window.open(`http://localhost:5000/downloads/${clip.filename}`, '_blank')}
+                    className="p-2 bg-secondary text-foreground rounded-lg hover:bg-indigo-600 hover:text-white transition-colors"
+                  >
                     <Download className="w-4 h-4" />
                   </button>
                 </div>

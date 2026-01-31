@@ -17,17 +17,26 @@ const downloadVideo = async (url, jobId) => {
     // Robust flags to bypass YouTube blocks and ensure good quality
     const options = {
       output: outputTemplate,
-      // Priority: mp4 combined > webm combined > merge video+audio to mp4
-      format: 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-      ffmpegLocation: ffmpeg, // CRITICAL: Allows yt-dlp to merge SABR streams
+      // Use 'best' to get the highest quality single file (usually 720p or 1080p mp4/webm)
+      // This is more reliable than requesting separate streams with restricted clients
+      format: 'bestvideo+bestaudio/best',
+      // Ensure we merge into mp4 if it's not already
+      mergeOutputFormat: 'mp4',
+      ffmpegLocation: ffmpeg, // CRITICAL: Allows yt-dlp to merge/remux
       noCheckCertificates: true,
       noPlaylist: true,
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      extractorArgs: 'youtube:player_client=android,web',
+      userAgent: 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Mobile Safari/537.36',
+      // Try android client which is sometimes more permissive for server-side downloads
+      extractorArgs: 'youtube:player_client=android',
+      // Add retries and handle connection issues
+      retries: 10,
+      retrySleep: 5,
+      noWarnings: true,
     };
 
     console.log('Download options (with ffmpeg):', JSON.stringify({ ...options, ffmpegLocation: 'EXISTS' }, null, 2));
 
+    // Increase process timeout or use a more resilient way if needed
     const result = await youtubedl(url, options);
     console.log('yt-dlp execution finished');
 

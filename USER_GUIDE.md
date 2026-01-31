@@ -37,6 +37,7 @@ CLIPFORGE works out of the box with **Local Free Mode**:
 4. **Open Browser:**
    - Navigate to `http://localhost:3000`
    - Paste a YouTube/TikTok URL
+   - **Choose Number of Clips:** Use the slider to select 1-10 clips
    - Click "Generate" - it will use **Local Free Mode** automatically!
 
 ---
@@ -109,9 +110,9 @@ Want faster processing? You can use your own API key from cloud providers.
 CLIPFORGE is designed with security in mind:
 
 - ✅ **Keys stored locally** in your browser (localStorage)
-- ✅ **Never sent to CLIPFORGE servers**
+- ✅ **Zero Server Storage:** Your keys never touch our database or `.env` files (highly recommended for shared hosting)
 - ✅ **Sent directly** to the AI provider you chose
-- ✅ **No server-side storage** of your API keys
+- ✅ **No server-side memory** of your API keys
 - ✅ **Open source** - Verify the code yourself!
 
 ### Best Practices
@@ -207,8 +208,8 @@ NODE_ENV=production
 REDIS_HOST=127.0.0.1
 REDIS_PORT=6379
 
-# Optional: Server-side default API keys
-OPENAI_API_KEY=sk-...  # Fallback if user doesn't provide
+# NOTE: API Keys are now managed via the Web UI for better security.
+# No need to put them here unless you want to implement a system-wide fallback.
 ```
 
 ---

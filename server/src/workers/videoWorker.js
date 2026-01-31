@@ -6,7 +6,7 @@ const { AIProviderFactory } = require('../services/aiProviderFactory');
 
 // Proses job di sini
 videoQueue.process(async (job) => {
-  const { id, url, provider = 'local', apiKey = null } = job.data;
+  const { id, url, provider = 'local', apiKey = null, clipCount = 3 } = job.data;
   
   console.log(`Processing Job ID: ${id}`);
   console.log(`  URL: ${url}`);
@@ -20,10 +20,21 @@ videoQueue.process(async (job) => {
   let outputFiles = [];
 
   try {
-    // 1. Update Progress: Download Video
+    // 1. Update Progress: Handle Video (Download or Local)
     await job.progress(10);
-    console.log('Step 1: Downloading Video...');
-    videoPath = await downloadVideo(url, id);
+    
+    if (job.data.isLocalFile && job.data.filePath) {
+      console.log('Step 1: Using Uploaded Local Video...');
+      videoPath = job.data.filePath;
+      // Optional: Check if file still exists
+      const fs = require('fs-extra');
+      if (!await fs.exists(videoPath)) {
+        throw new Error('Local video file not found at ' + videoPath);
+      }
+    } else {
+      console.log('Step 1: Downloading Video...');
+      videoPath = await downloadVideo(url, id);
+    }
 
     // 2. Update Progress: Extract Audio
     await job.progress(25);
@@ -48,7 +59,7 @@ videoQueue.process(async (job) => {
     const analyzer = AIProviderFactory.createAnalyzer(provider, apiKey);
     console.log(`Using analyzer: ${analyzer.constructor.name}`);
     
-    viralSegments = await analyzer.analyzeContent(transcriptText);
+    viralSegments = await analyzer.analyzeContent(transcriptText, 0, clipCount);
     console.log(`Found ${viralSegments.length} segments`);
 
     // 5. Update Progress: Cut & Process Videos
