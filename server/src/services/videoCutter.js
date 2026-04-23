@@ -41,6 +41,8 @@ const cutAndProcessVideo = (videoPath, segments, jobId) => {
         // 2. Replace backslashes with forward slashes
         // 3. Escape the drive letter colon (e.g. "D:" -> "D\:")
         // 4. Wrap in single quotes '...'
+        const tempAssFilename = `temp_${jobId}_${i}.ass`;
+        const tempAssPath = path.join(outputDir, tempAssFilename);
         const ffmpegSafeAssPath = tempAssPath.replace(/\\/g, '/').replace(':', '\\:');
 
         const { generateSRT } = require('./subtitleGenerator'); // Actually generateASS now
